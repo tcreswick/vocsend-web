@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>vocsend — transmit data between air-gapped devices using audio</title>
+<meta name="description" content="Easily transmit data between air-gapped devices using audio. Send a key, a certificate or a note from one device's speaker to another's microphone, straight from your browser.">
+<meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#/" aria-label="vocsend home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="12" width="4" height="8" rx="2" fill="#f0522d"/><rect x="10" y="6" width="4" height="20" rx="2" fill="#e8663a"/><rect x="17" y="10" width="4" height="12" rx="2" fill="#5b9486"/><rect x="24" y="3" width="4" height="26" rx="2" fill="#0c7c7e"/></svg>
+    vocsend
+  </a>
+  <nav>
+    <a href="cli.html">Command line</a>
+    <a href="https://github.com/tcreswick/vocsend" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main class="wrap">
+
+<!-- ================================================================ home -->
+<section data-view="home">
+  <div class="hero">
+    <div class="bars idle" aria-hidden="true"></div>
+    <h1>Easily transmit data between air-gapped devices using audio</h1>
+    <p class="lede">Keys, certificates, signatures, notes: out of one device's speaker and into another's microphone. No network, no cable, nothing to install.</p>
+    <div class="choices">
+      <a class="big send" href="#/send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        Send now
+        <small>this device speaks</small>
+      </a>
+      <a class="big receive" href="#/receive">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        Receive now
+        <small>this device listens</small>
+      </a>
+    </div>
+    <a class="sub-choice" href="#/test">Run a speed test between two devices</a>
+  </div>
+
+  <h2 class="section-title">What it is</h2>
+  <p>vocsend moves small amounts of data from one device to another as sound. One side plays it; the other hears it. It works between phones, laptops and desktops, in any combination, and with the <a href="cli.html">command-line version</a> on a server with no screen.</p>
+  <p>It is for the small things that so often need to cross a gap: a public key, a certificate, a signature, a Wi-Fi password, a one-time code. It is slow by network standards, up to about 100 bits per second, which is plenty for those.</p>
+
+  <h2 class="section-title">Why it exists</h2>
+  <div class="card">
+    <h2>Two machines, no connection</h2>
+    <p class="muted">An air-gapped machine is one kept off every network on purpose. Getting even a few hundred bytes onto or off it usually means hunting for a USB stick that you then have to trust. Other machines are simply awkward: different networks, no shared drive, no cable to hand.</p>
+  </div>
+  <div class="card">
+    <h2>Modern microphones break the obvious answer</h2>
+    <p class="muted">Sound is the natural bridge, and tools for sending data as sound have existed for decades. But microphones, drivers and operating systems now apply noise suppression, echo cancellation and automatic gain by default. They keep speech and remove everything else, and a data signal is "everything else". On a lot of current hardware the traditional tools simply do not work.</p>
+  </div>
+
+  <h2 class="section-title">How it works</h2>
+  <p>vocsend uses <strong>vocal-style encoding</strong>: it sounds enough like a voice that noise suppression lets it through.</p>
+  <ol class="steps">
+    <li><strong>The data rides on pitch.</strong> The message becomes a string of very short syllables, each sung at one steady pitch from a small set. A room changes loudness and tone, but it cannot move a frequency, so pitch arrives intact.</li>
+    <li><strong>Everything else changes, and means nothing.</strong> The vowel, the way each syllable starts, how bright and how loud it is: all of it varies from one syllable to the next in a fixed pattern. A noise suppressor removes whatever holds still. This never does.</li>
+    <li><strong>Errors are repaired.</strong> Every block carries a checksum and error correction. Nothing is shown unless it verifies, and both sides display a short fingerprint you can compare.</li>
+  </ol>
+
+  <h2 class="section-title">Levels: not just speed</h2>
+  <p>There are ten levels. Level 10 is the fastest, but the level changes much more than the speed. Lower levels use <strong>fewer pitches, spaced further apart</strong>, in <strong>longer syllables</strong>, with <strong>more error correction</strong>. The signal itself becomes simpler and easier to hear, which is what gets it through a noisy room, a tinny speaker or an aggressive microphone.</p>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>Level</th><th>Pitches</th><th>Syllable</th><th>Error correction</th><th>Bits/s</th></tr></thead>
+      <tbody id="levels-table"></tbody>
+    </table>
+  </div>
+  <p class="muted small">When receiving, there is nothing to choose: the level is announced at the start of every transmission and picked up automatically. With <em>negotiate</em> switched on, the two devices try the levels and settle on the fastest one that works.</p>
+
+  <h2 class="section-title">On a computer or a server</h2>
+  <p>The same protocol runs from a terminal, so a phone can talk to a machine with no browser at all.</p>
+  <p>
+    <a class="cta" href="cli.html">How to use the command-line version</a>
+    <a class="cta light" href="https://github.com/tcreswick/vocsend" rel="noopener">vocsend on GitHub</a>
+  </p>
+
+  <h2 class="section-title">Private by design</h2>
+  <p>This page runs entirely in your browser. Nothing you type, send or receive leaves the device except as sound. There are no accounts, no servers and no tracking, and once loaded it needs no network. You can add a shared key to encrypt what is sent; without one, anyone within earshot can record it.</p>
+</section>
+
+<!-- ================================================================ send -->
+<section data-view="send" hidden>
+  <a class="back" href="#/">← Home</a>
+  <div class="card">
+    <h2>Send</h2>
+    <div class="chip" id="send-chip" hidden><span id="send-chip-text"></span><button class="linkish" id="send-chip-clear" type="button">remove</button></div>
+    <textarea id="send-text" placeholder="Type or paste what you want to send: a key, a certificate, a note…" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+    <div class="row" style="align-items:center;justify-content:space-between">
+      <span class="muted small" id="send-size">Nothing to send yet.</span>
+      <label class="linkish small" for="send-file">or choose a file</label>
+      <input type="file" id="send-file" hidden>
+    </div>
+    <button class="action send" id="send-go" type="button">Send now</button>
+
+    <div class="status" id="send-status" hidden>
+      <div class="bars" aria-hidden="true"></div>
+      <div class="now" id="send-now"></div>
+      <div class="progress"><div id="send-bar"></div></div>
+      <div class="detail" id="send-detail"></div>
+    </div>
+    <div id="send-result"></div>
+
+    <details class="settings" id="send-settings">
+      <summary>Settings</summary>
+
+      <div class="level-read"><b>Level <span id="send-level-n">4</span></b><span id="send-level-about"></span></div>
+      <input type="range" id="send-level" min="1" max="10" step="1" value="4" aria-label="Level">
+      <div class="scale"><span>1 · most robust</span><span>fastest · 10</span></div>
+      <p class="muted small">The level is more than a speed. Lower levels use fewer, wider-spaced pitches, longer syllables and more error correction, which makes the signal simpler for noisy rooms and poor speakers. Start low; go up when you know the path is good.</p>
+
+      <label class="switch">
+        <input type="checkbox" id="send-negotiate">
+        <div><b>Negotiate</b><span>The two devices find the fastest level that works, and every block is acknowledged and repeated if needed. The receiver must allow replies, and this device will need its microphone. Ignores the level above.</span></div>
+      </label>
+
+      <label class="switch">
+        <input type="checkbox" id="send-encrypt">
+        <div><b>Encrypt</b><span>Protect the message with a shared key. The receiver must enter the same key.</span></div>
+      </label>
+      <div id="send-key-box" hidden>
+        <label class="field" for="send-key">Key</label>
+        <input type="password" id="send-key" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="A phrase both sides know">
+        <label class="field" for="send-address">Send only to (optional)</label>
+        <input type="text" id="send-address" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="A receiver's name, such as laptop">
+        <p class="muted small">With several receivers in earshot, a name picks one: only a receiver listening under that name takes the message.</p>
+      </div>
+    </details>
+
+    <details class="settings"><summary>Log</summary><div class="log" id="send-log"></div></details>
+  </div>
+  <p class="muted small">Turn the volume up and point the speaker at the other device. On an iPhone the ring/silent switch must be set to ring.</p>
+</section>
+
+<!-- ============================================================= receive -->
+<section data-view="receive" hidden>
+  <a class="back" href="#/">← Home</a>
+  <div class="card">
+    <h2>Receive</h2>
+    <p class="muted small">Start listening, then start the sender. The level is detected automatically: every transmission announces its own.</p>
+    <button class="action receive" id="receive-go" type="button">Start listening</button>
+
+    <div class="status" id="receive-status" hidden>
+      <div class="bars" aria-hidden="true"></div>
+      <div class="now" id="receive-now"></div>
+      <div class="progress"><div id="receive-bar"></div></div>
+      <div class="detail" id="receive-detail"></div>
+    </div>
+    <div id="receive-result"></div>
+
+    <div id="received" hidden>
+      <label class="field" for="receive-text">Received</label>
+      <textarea id="receive-text" readonly></textarea>
+      <div class="row">
+        <button class="button" id="receive-copy" type="button">Copy</button>
+        <button class="button" id="receive-save" type="button">Save as file</button>
+        <button class="button primary" id="receive-resend" type="button">Send this on</button>
+      </div>
+      <p class="muted small">"Send this on" carries what you received to another device: pick up a certificate from a server here, walk to your desk, and play it to your desktop.</p>
+      <dl class="info" id="receive-info"></dl>
+    </div>
+
+    <details class="settings" id="receive-settings">
+      <summary>Settings</summary>
+      <label class="switch">
+        <input type="checkbox" id="receive-replies" checked>
+        <div><b>Allow replies</b><span>Needed if the sender negotiates. Switch off to guarantee this device never makes a sound: it then only accepts one-way transmissions.</span></div>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="receive-encrypt">
+        <div><b>Encrypted</b><span>Switch on if the sender is encrypting, and enter the same key.</span></div>
+      </label>
+      <div id="receive-key-box" hidden>
+        <label class="field" for="receive-key">Key</label>
+        <input type="password" id="receive-key" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="The phrase the sender used">
+        <label class="field" for="receive-address">This receiver's name (optional)</label>
+        <input type="text" id="receive-address" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Such as laptop">
+      </div>
+    </details>
+
+    <details class="settings"><summary>Log</summary><div class="log" id="receive-log"></div></details>
+  </div>
+</section>
+
+<!-- ================================================================ test -->
+<section data-view="test" hidden>
+  <a class="back" href="#/">← Home</a>
+  <div class="card">
+    <h2>Speed test</h2>
+    <p class="muted small">One device plays a known burst at each level, over and over; the other shows how each one arrived. Use it to find the fastest level a pair of devices can manage in a particular spot, and to experiment: move them, turn the volume up or down, and watch the table change.</p>
+    <p class="muted small">Run it on two phones, or with a computer on the other end: this page, or <code>vocsend tx test</code> and <code>vocsend rx test</code> from the command line. Each direction is separate, so test the way you intend to send.</p>
+
+    <div class="segmented" role="group" aria-label="Direction">
+      <button type="button" id="test-listen" aria-pressed="true">This device listens</button>
+      <button type="button" id="test-speak" aria-pressed="false">This device sends</button>
+    </div>
+
+    <div class="row" id="test-range" style="align-items:center" hidden>
+      <span class="muted small">Levels</span>
+      <select id="test-lo" aria-label="Lowest level"></select>
+      <span class="muted small">to</span>
+      <select id="test-hi" aria-label="Highest level"></select>
+    </div>
+
+    <button class="action receive" id="test-go" type="button">Start listening</button>
+
+    <div class="status" id="test-status" hidden>
+      <div class="bars" aria-hidden="true"></div>
+      <div class="now" id="test-now"></div>
+      <div class="detail" id="test-detail"></div>
+    </div>
+    <div id="test-result"></div>
+
+    <div class="scroll" id="test-table-box">
+      <table>
+        <thead><tr><th>Level</th><th>Bits/s</th><th>Last wrong</th><th>Loudness</th><th>Average</th><th>Verdict</th></tr></thead>
+        <tbody id="test-table"></tbody>
+      </table>
+    </div>
+    <p class="small" id="test-summary"></p>
+    <p class="muted small"><strong>Solid</strong> means a real message would get through with room to spare. <strong>Marginal</strong> means error correction is working hard. <strong>Fails</strong> means too many syllables are being misheard at that level.</p>
+
+    <details class="settings"><summary>Log</summary><div class="log" id="test-log"></div></details>
+  </div>
+</section>
+
+<footer>
+  <p><a href="https://github.com/tcreswick/vocsend" rel="noopener">vocsend on GitHub</a> · <a href="cli.html">Command-line version</a> · <a href="https://github.com/tcreswick/vocsend-web" rel="noopener">This site's source</a></p>
+  <p>By Tim Creswick. MIT licence. <span id="build-info"></span></p>
+</footer>
+
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

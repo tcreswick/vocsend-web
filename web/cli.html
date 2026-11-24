@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>vocsend on the command line</title>
+<meta name="description" content="How to install and use vocsend from a terminal: send keys, certificates and files between computers by sound, through noise suppression.">
+<meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="./" aria-label="vocsend home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="12" width="4" height="8" rx="2" fill="#f0522d"/><rect x="10" y="6" width="4" height="20" rx="2" fill="#e8663a"/><rect x="17" y="10" width="4" height="12" rx="2" fill="#5b9486"/><rect x="24" y="3" width="4" height="26" rx="2" fill="#0c7c7e"/></svg>
+    vocsend
+  </a>
+  <nav>
+    <a href="./">Web app</a>
+    <a href="https://github.com/tcreswick/vocsend" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main class="wrap doc">
+  <a class="back" href="./">← Web app</a>
+  <h1>vocsend on the command line</h1>
+  <p class="muted">The desktop and server version: one small program for Linux, macOS and Windows. It speaks the same protocol as the web app, so a terminal on one side and a phone on the other works too.</p>
+
+<pre><code><span class="p">receiver$</span> vocsend rx
+<span class="p">sender$</span> vocsend tx id_ed25519.pub</code></pre>
+
+  <p>
+    <a class="cta" href="https://github.com/tcreswick/vocsend/releases" rel="noopener">Download a release</a>
+    <a class="cta light" href="https://github.com/tcreswick/vocsend" rel="noopener">Source on GitHub</a>
+  </p>
+
+  <h2>Install</h2>
+  <p>Download a binary for your system from the <a href="https://github.com/tcreswick/vocsend/releases" rel="noopener">releases page</a>, or build it from source with a Rust toolchain:</p>
+<pre><code>git clone https://github.com/tcreswick/vocsend
+cd vocsend
+cargo build --release</code></pre>
+  <p>That produces <code>target/release/vocsend</code>. On Linux the build needs the ALSA development headers (<code>libasound2-dev</code> on Debian and Ubuntu, <code>alsa-lib-devel</code> on Fedora, <code>alsa-lib</code> on Arch).</p>
+  <p>It uses the system's default speaker and microphone. Nothing else needs setting up.</p>
+
+  <h2>Examples</h2>
+  <p>In these, <code>sender$</code> and <code>receiver$</code> are the prompts on the two machines. Start the receiver first unless it says otherwise.</p>
+
+  <h3>Quick-send a public key from one box to another</h3>
+  <p>One-way: the receiving machine never makes a sound.</p>
+<pre><code><span class="p">receiver$</span> vocsend rx
+<span class="p">sender$</span> vocsend tx ~/.ssh/id_ed25519.pub</code></pre>
+  <p>The receiver saves <code>id_ed25519.pub</code> in its current directory. Both sides print the same short fingerprint, so you can see it arrived intact.</p>
+
+  <h3>Send a file, negotiated</h3>
+  <p>The two machines agree on the fastest speed the path can take, and every block is acknowledged and repeated if needed. Start them in either order.</p>
+<pre><code><span class="p">receiver$</span> vocsend rx negotiate
+<span class="p">sender$</span> vocsend tx negotiate release.sig</code></pre>
+
+  <h3>Send to several machines at once</h3>
+  <p>A one-way transmission is a broadcast: every receiver in earshot gets its own copy.</p>
+<pre><code><span class="p">receiver-1$</span> vocsend rx
+<span class="p">receiver-2$</span> vocsend rx
+<span class="p">receiver-3$</span> vocsend rx
+<span class="p">sender$</span> vocsend tx ca-certificate.pem</code></pre>
+
+  <h3>Send with encryption</h3>
+  <p>Both sides are asked for the shared key, which is never shown or sent.</p>
+<pre><code><span class="p">receiver$</span> vocsend rx --encrypt
+<span class="c">Key:</span>
+<span class="p">sender$</span> vocsend tx secret.txt --encrypt
+<span class="c">Key:</span></code></pre>
+
+  <h3>Send to one machine among several</h3>
+  <p>With encryption, <code>--address</code> names the receiver a message is for. The others ignore it.</p>
+<pre><code><span class="p">laptop$</span> vocsend rx --encrypt --address laptop
+<span class="p">desktop$</span> vocsend rx --encrypt --address desktop
+<span class="p">sender$</span> vocsend tx notes.txt --encrypt --address laptop</code></pre>
+
+  <h3>Stream between hosts</h3>
+  <p>Each line is sent when you press Enter and appears on the other side. End with Ctrl-D.</p>
+<pre><code><span class="p">receiver$</span> vocsend rx --stream
+<span class="p">sender$</span> vocsend tx --stream</code></pre>
+
+  <h3>Pipe anything</h3>
+<pre><code><span class="p">receiver$</span> vocsend rx | sha256sum
+<span class="p">sender$</span> gpg --export --armor me@example.com | vocsend tx</code></pre>
+
+  <h3>To or from a phone</h3>
+  <p>Open the <a href="./">web app</a> on the phone. To send from a terminal to the phone, press <em>Receive now</em> on the phone and run <code>vocsend tx</code>. To send from the phone, run <code>vocsend rx</code> and press <em>Send now</em>. With <code>negotiate</code> on the terminal, switch <em>Negotiate</em> on in the app's send settings, or leave <em>Allow replies</em> on when receiving.</p>
+
+  <h2>Usage</h2>
+<pre><code>vocsend tx [negotiate] [FILE]     <span class="c">send</span>
+vocsend rx [negotiate] [FILE]     <span class="c">receive</span>
+vocsend tx test | rx test         <span class="c">find out which speeds work between two machines</span>
+vocsend help                      <span class="c">everything, in detail</span></code></pre>
+
+  <div class="scroll"><table>
+    <thead><tr><th>What is sent</th><th></th></tr></thead>
+    <tbody>
+      <tr><td><code>vocsend tx FILE</code></td><td>the file, and its name</td></tr>
+      <tr><td><code>vocsend tx</code></td><td>standard input (also <code>vocsend tx -</code>)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Where it goes</th><th></th></tr></thead>
+    <tbody>
+      <tr><td><code>vocsend rx</code></td><td>a file with the sender's name if one was sent (never overwriting: <code>key.pub</code>, then <code>key-1.pub</code>), otherwise standard output</td></tr>
+      <tr><td><code>vocsend rx FILE</code></td><td>that file, whatever the sender called it</td></tr>
+      <tr><td><code>vocsend rx -</code></td><td>standard output, always</td></tr>
+    </tbody>
+  </table></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Option</th><th></th></tr></thead>
+    <tbody>
+      <tr><td><code>--level N</code></td><td>one-way speed, 1 (slowest, most robust) to 10 (fastest). Default 4. <code>--level last</code> reuses the level the last negotiation ended on.</td></tr>
+      <tr><td><code>--encrypt [KEY]</code></td><td>encrypt with a shared key. With no key you are asked for it.</td></tr>
+      <tr><td><code>--address NAME</code></td><td>with <code>--encrypt</code>: which receiver the message is for</td></tr>
+      <tr><td><code>--timeout SECONDS</code></td><td>receiver: give up if nothing is heard for this long. Default 60; 0 waits for ever.</td></tr>
+      <tr><td><code>--stream</code></td><td>send standard input a line at a time; print each line as it arrives</td></tr>
+      <tr><td><code>--stream-chars</code></td><td>as <code>--stream</code>, without waiting for Enter</td></tr>
+      <tr><td><code>-q</code>, <code>--quiet</code></td><td>print nothing unless something goes wrong</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>One-way or negotiated</h2>
+  <p><strong>One-way</strong> (the default) sends sound in one direction only. A one-way receiver never opens the speaker, so it cannot transmit; if the sender tries to negotiate with it, it stops with an error and stays silent. The price is that nothing can be asked for again, so the sender uses a cautious speed and cannot know whether the message arrived.</p>
+  <p><strong>Negotiated</strong> (<code>negotiate</code> on both sides):</p>
+  <ol>
+    <li>The sender calls every few seconds until the receiver answers.</li>
+    <li>The sender plays a ramp: a short burst at each speed level. The receiver reports the fastest level that arrived clean.</li>
+    <li>The sender plays a longer test at that level. The receiver confirms it, asks for more error correction, or steps down a level, whichever is fastest overall.</li>
+    <li>The data goes in blocks of about 30 seconds, each acknowledged. A block that fails is sent again one level slower, up to three times.</li>
+  </ol>
+  <p>Only the sender-to-receiver direction is trained. Everything the receiver says uses the slowest, most robust setting.</p>
+
+  <h2>Speed levels</h2>
+  <p>The level is more than a speed. Higher levels use more pitches, packed closer together, in shorter syllables, with less error correction. Lower levels make the signal itself simpler, which is what carries it through noise.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Level</th><th>Pitches</th><th>Syllable</th><th>Bits per second</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>4</td><td>120 ms</td><td>8</td></tr>
+      <tr><td>2</td><td>8</td><td>100 ms</td><td>18</td></tr>
+      <tr><td>3</td><td>8</td><td>80 ms</td><td>25</td></tr>
+      <tr><td>4</td><td>16</td><td>80 ms</td><td>36</td></tr>
+      <tr><td>5</td><td>16</td><td>60 ms</td><td>51</td></tr>
+      <tr><td>6</td><td>16</td><td>50 ms</td><td>64</td></tr>
+      <tr><td>7</td><td>32</td><td>60 ms</td><td>67</td></tr>
+      <tr><td>8</td><td>32</td><td>50 ms</td><td>83</td></tr>
+      <tr><td>9</td><td>64</td><td>55 ms</td><td>91</td></tr>
+      <tr><td>10</td><td>64</td><td>50 ms</td><td>104</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Finding out what works</h2>
+<pre><code><span class="p">receiver$</span> vocsend rx test
+<span class="p">sender$</span> vocsend tx test</code></pre>
+  <p>The sender loops through the levels with a known burst at each. The receiver shows a live table of how each one is arriving, so you can move the machines or change the volume and watch what happens:</p>
+<pre><code><span class="c">level  pitches  syllable  bits/s   last run           recent average   verdict
+                          (net)    wrong   loudness   (up to 3 runs)</span>
+    6       16     50 ms      64     0.0%    -21 dB      0.0%           solid
+    7       32     60 ms      67     1.7%    -21 dB      2.5%           marginal
+    8       32     50 ms      83     6.7%    -21 dB      6.7%           fails
+
+<span class="c">bursts heard: 6.  Fastest solid level so far: 6  (use: vocsend tx --level 6)</span></code></pre>
+  <p>The web app's <a href="./#/test">speed test</a> does the same thing, and either side can be the app.</p>
+
+  <h2>Encryption</h2>
+  <p><code>--encrypt</code> on both sides encrypts and authenticates every block with ChaCha20-Poly1305, using a key derived from the shared passphrase by Argon2id. The file name is encrypted along with the data. Every packet says whether encryption is in use, so a mismatch is reported at once instead of producing garbage, and a recorded transmission cannot be replayed into the same session.</p>
+  <p>Give the key as <code>--encrypt KEY</code>, in the <code>VOCSEND_KEY</code> environment variable, or leave it off to be asked. A key on the command line is visible to other users of the machine and ends up in shell history.</p>
+  <p>Anyone who can hear a transmission can record it, and a shared passphrase is only as strong as it is long. For anything that matters, encrypt and sign the data with an established tool before sending it as well.</p>
+
+  <h2>Checking it arrived</h2>
+  <p>Both sides print a short fingerprint of the data, such as <code>3f9a-c21d-77b0</code>. If they match, both have the same bytes. Every block already carries a checksum and error correction, so a mismatch should never happen; the fingerprint is for peace of mind, and for one-way transfers, where the sender otherwise hears nothing back.</p>
+
+  <h2>Exit status</h2>
+  <div class="scroll"><table>
+    <tbody>
+      <tr><td>0</td><td>success</td></tr>
+      <tr><td>1</td><td>the transfer failed, or nothing was heard before the timeout</td></tr>
+      <tr><td>2</td><td>wrong mode: the sender is negotiating and the receiver is one-way</td></tr>
+      <tr><td>3</td><td>encryption settings or keys differ</td></tr>
+      <tr><td>4</td><td>the two sides' versions are not compatible</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Shell completion</h2>
+<pre><code>vocsend completions bash > ~/.local/share/bash-completion/completions/vocsend
+vocsend completions zsh  > "${fpath[1]}/_vocsend"
+vocsend completions fish > ~/.config/fish/completions/vocsend.fish</code></pre>
+
+  <p style="margin-top:36px">
+    <a class="cta" href="https://github.com/tcreswick/vocsend" rel="noopener">vocsend on GitHub</a>
+    <a class="cta light" href="./">Open the web app</a>
+  </p>
+
+  <footer>
+    <p><a href="https://github.com/tcreswick/vocsend" rel="noopener">vocsend on GitHub</a> · <a href="./">Web app</a> · <a href="https://github.com/tcreswick/vocsend-web" rel="noopener">This site's source</a></p>
+    <p>By Tim Creswick. MIT licence.</p>
+  </footer>
+</main>
+</body>
+</html>
