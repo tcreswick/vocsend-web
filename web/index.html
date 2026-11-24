@@ -7,6 +7,22 @@
 <meta name="description" content="Easily transmit data between air-gapped devices using audio. Send a key, a certificate or a note from one device's speaker to another's microphone, straight from your browser.">
 <meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://www.vocsend.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="vocsend">
+<meta property="og:url" content="https://www.vocsend.com/">
+<meta property="og:title" content="vocsend — transmit data between air-gapped devices using audio">
+<meta property="og:description" content="Send a key, a certificate or a note from one device's speaker to another's microphone, straight from your browser. No network, no cable, nothing to install.">
+<meta property="og:image" content="https://www.vocsend.com/social.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="vocsend: easily transmit data between air-gapped devices using audio">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="vocsend — transmit data between air-gapped devices using audio">
+<meta name="twitter:description" content="Send a key, a certificate or a note from one device's speaker to another's microphone, straight from your browser. No network, no cable, nothing to install.">
+<meta name="twitter:image" content="https://www.vocsend.com/social.png">
+<link rel="apple-touch-icon" href="touch-icon.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -24,6 +40,11 @@
 </header>
 
 <main class="wrap">
+
+<p class="private">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+  <span><b>Runs entirely in your browser.</b> Nothing you type, send or receive is ever sent to, or received from, a web server. It leaves this device only as sound.</span>
+</p>
 
 <!-- ================================================================ home -->
 <section data-view="home">
@@ -114,14 +135,16 @@
     <details class="settings" id="send-settings">
       <summary>Settings</summary>
 
-      <div class="level-read"><b>Level <span id="send-level-n">4</span></b><span id="send-level-about"></span></div>
-      <input type="range" id="send-level" min="1" max="10" step="1" value="4" aria-label="Level">
-      <div class="scale"><span>1 · most robust</span><span>fastest · 10</span></div>
+      <div id="send-level-block">
+        <div class="level-read"><b id="send-level-title">Level <span id="send-level-n">4</span></b><span id="send-level-about"></span></div>
+        <input type="range" id="send-level" min="1" max="10" step="1" value="4" aria-label="Level">
+        <div class="scale"><span>1 · most robust</span><span>fastest · 10</span></div>
+      </div>
       <p class="muted small">The level is more than a speed. Lower levels use fewer, wider-spaced pitches, longer syllables and more error correction, which makes the signal simpler for noisy rooms and poor speakers. Start low; go up when you know the path is good.</p>
 
       <label class="switch">
         <input type="checkbox" id="send-negotiate">
-        <div><b>Negotiate</b><span>The two devices find the fastest level that works, and every block is acknowledged and repeated if needed. The receiver must allow replies, and this device will need its microphone. Ignores the level above.</span></div>
+        <div><b>Negotiate</b><span>The two devices find the fastest level that works, and every block is acknowledged and repeated if needed. The receiver must allow replies, and this device will need its microphone. The level is then chosen for you.</span></div>
       </label>
 
       <label class="switch">

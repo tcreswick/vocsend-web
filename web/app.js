@@ -282,8 +282,14 @@ function currentPayload() {
 
 function describeLevel() {
   const n = +$("send-level").value, l = levels[n - 1];
+  const negotiate = $("send-negotiate").checked;
+  $("send-level").disabled = negotiate;
+  $("send-level-block").classList.toggle("off", negotiate);
+  $("send-level-title").firstChild.textContent = negotiate ? "Level: automatic" : "Level ";
+  $("send-level-n").hidden = negotiate;
   $("send-level-n").textContent = n;
-  if (l) $("send-level-about").textContent = `${l.pitches} pitches · ${l.ms} ms syllables · about ${Math.round(l.bitsPerSecond)} bits/s`;
+  if (negotiate) $("send-level-about").textContent = "Negotiate is on, so the two devices pick the fastest level that works";
+  else if (l) $("send-level-about").textContent = `${l.pitches} pitches · ${l.ms} ms syllables · about ${Math.round(l.bitsPerSecond)} bits/s`;
 }
 
 function refreshSend() {
