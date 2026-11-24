@@ -350,8 +350,8 @@ dependencies = [
 
 [[package]]
 name = "vocsend"
-version = "0.1.0"
-source = "git+https://github.com/tcreswick/vocsend#dbae9994fae2d84ceed090aa400dfc077f8e88a0"
+version = "1.0.2"
+source = "git+https://github.com/tcreswick/vocsend#45955305d438bc7c9f475f0284ba4aebd198862b"
 dependencies = [
  "argon2",
  "chacha20poly1305",

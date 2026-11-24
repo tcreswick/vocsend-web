@@ -247,3 +247,5 @@ input[type=range]:disabled { cursor: not-allowed; }
   .top { padding-top: calc(16px + env(safe-area-inset-top)); }
   body { padding-bottom: env(safe-area-inset-bottom); }
 }
+
+.print { font: 700 1.15em var(--mono); letter-spacing: 0.12em; padding: 1px 7px; border-radius: 6px; background: var(--ink); color: var(--paper); white-space: nowrap; }

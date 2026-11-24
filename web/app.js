@@ -122,11 +122,17 @@ function log(view, text) {
   box.scrollTop = box.scrollHeight;
 }
 
-function notice(view, text, good) {
+function notice(view, text, good, print, after) {
   const box = $(`${view}-result`);
   const div = document.createElement("div");
   div.className = "notice " + (good ? "good" : "bad");
   div.textContent = text;
+  if (print) {
+    const mark = document.createElement("b");
+    mark.className = "print";
+    mark.textContent = print;
+    div.append(mark, after || "");
+  }
   box.appendChild(div);
 }
 
@@ -138,8 +144,9 @@ function clock(seconds) {
 async function fingerprint(bytes) {
   if (!crypto.subtle) return "";
   const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
-  const hex = [...hash.slice(0, 6)].map(b => b.toString(16).padStart(2, "0"));
-  return `${hex[0]}${hex[1]}-${hex[2]}${hex[3]}-${hex[4]}${hex[5]}`;
+  // The same four characters the command line prints: 20 bits of the hash.
+  const bits = hash[0] << 12 | hash[1] << 4 | hash[2] >> 4;
+  return [3, 2, 1, 0].map(i => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[(bits >> (5 * i)) & 31]).join("");
 }
 
 function setBar(view, fraction) {
@@ -264,7 +271,7 @@ function onDone(view, event) {
     setBar(view, event.ok ? 1 : 0);
     stop();
     if (view === "send" && event.ok && sendPayload.last) {
-      notice(view, `${event.text} Fingerprint ${await fingerprint(sendPayload.last)}: the receiver should show the same.`, true);
+      notice(view, `${event.text} Fingerprint `, true, await fingerprint(sendPayload.last), " — the receiver should show the same.");
     } else if (!(view === "receive" && event.ok)) {
       notice(view, event.text, event.ok);
     }
@@ -382,7 +389,7 @@ function onReceived(event) {
     dt.textContent = k; dd.textContent = v;
     $("receive-info").append(dt, dd);
   }
-  notice("receive", `Received ${bytes.length} bytes, checked and intact. Fingerprint ${event.fingerprint}: the sender should show the same.`, true);
+  notice("receive", `Received ${bytes.length} bytes, checked and intact. Fingerprint `, true, event.fingerprint, " — the sender should show the same.");
   log("receive", `Received ${bytes.length} bytes at level ${event.level}.`);
 }
 
