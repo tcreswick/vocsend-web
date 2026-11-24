@@ -235,3 +235,15 @@ pre .c { color: #8a8f99; }                         /* a comment or output */
 
 #send-level-block.off .scale, #send-level-block.off input { opacity: 0.4; }
 input[type=range]:disabled { cursor: not-allowed; }
+
+/* ---------------------------------------------------------------- install */
+
+.install { text-align: center; margin: 14px 0 0; }
+.install p { margin: 4px 0 0; }
+.install .linkish { color: var(--receive); font-weight: 600; }
+
+/* Installed as an app: keep clear of the notch and the home indicator. */
+@media (display-mode: standalone) {
+  .top { padding-top: calc(16px + env(safe-area-inset-top)); }
+  body { padding-bottom: env(safe-area-inset-bottom); }
+}

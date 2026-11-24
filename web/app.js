@@ -515,5 +515,35 @@ function route() {
   window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", route);
+
+// ---------------------------------------------------------------- install
+// Keep a copy of the app on the device so it works offline, and offer to
+// install it where the browser allows.
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+
+{
+  const installed = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  let offer = null;
+  if (!installed && apple) {
+    $("install").hidden = false;
+    $("install-button").hidden = true;
+    $("install-how").hidden = false;
+  }
+  window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault();
+    offer = event;
+    $("install").hidden = false;
+  });
+  $("install-button").addEventListener("click", async () => {
+    if (!offer) return;
+    offer.prompt();
+    await offer.userChoice;
+    offer = null;
+    $("install").hidden = true;
+  });
+  window.addEventListener("appinstalled", () => { $("install").hidden = true; });
+}
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && active) keepAwake(true); });
 route();

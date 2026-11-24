@@ -23,6 +23,11 @@
 <meta name="twitter:description" content="Send a key, a certificate or a note from one device's speaker to another's microphone, straight from your browser. No network, no cable, nothing to install.">
 <meta name="twitter:image" content="https://www.vocsend.com/social.png">
 <link rel="apple-touch-icon" href="touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="vocsend">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -65,6 +70,11 @@
       </a>
     </div>
     <a class="sub-choice" href="#/test">Run a speed test between two devices</a>
+    <div class="install" id="install" hidden>
+      <button type="button" class="linkish" id="install-button">Install vocsend as an app</button>
+      <p class="muted small" id="install-how" hidden>To install on iPhone or iPad: tap Share, then “Add to Home Screen”.</p>
+      <p class="muted small">Once installed it opens and works with no network at all.</p>
+    </div>
   </div>
 
   <h2 class="section-title">What it is</h2>
